@@ -1,3 +1,8 @@
+/*
+ * NOTES:
+ *  THRO:
+ */
+
 // Constant Variables ----------------------------------------------------------------------
 const int testPin = 7;
 
@@ -10,12 +15,13 @@ void setup()
   pinMode(testPin, INPUT);
 
   //Begin Serial
-  Serial.begin(115200);
+  Serial.begin(9600);
 }
 
 void loop() 
 {
   duration = pulseIn(testPin, HIGH);
   Serial.println(duration);
-  delay(10);
+  Serial.println();
+  delay(1000);
 }
