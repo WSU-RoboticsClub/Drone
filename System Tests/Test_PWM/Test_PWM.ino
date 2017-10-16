@@ -39,7 +39,7 @@ void loop()
 
   if(positive) //If on the positive side of the cycle...
   {
-    if(currentTime-previoustime >= period*duty) //... and we've reached the end of the duty cycle for this period:
+    if(currentTime-previousTime >= period*duty) //... and we've reached the end of the duty cycle for this period:
     {
       //Drive the output low but don't reset the timer, the period continues
       digitalWrite(s1_pin, LOW);
@@ -53,7 +53,7 @@ void loop()
       digitalWrite(s1_pin, HIGH);
 
       //Reset the timer
-      previousTime = currenTime;
+      previousTime = currentTime;
     }
   }
 }
