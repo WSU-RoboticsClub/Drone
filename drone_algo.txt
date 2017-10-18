@@ -1,0 +1,20 @@
+Main pseudo-code:
+
+while (true) {
+
+	Thread each sub routine, using mutual exclusion to
+	stop two or more sub-routines from accessing the 
+	rotors at the same time.
+
+	Sub-routines (as of now) includes balance (default daemon), 
+	and command daemon (left, right, up, down).
+
+	Command daemon will incorporate self-balancing
+	so as to keep the drone from falling while idle.
+
+	Exception handling will, worst case, call landing().
+
+	Master thread is remote control for prototype,
+	sends information to all other sub-routines.
+
+}
