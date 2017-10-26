@@ -7,19 +7,20 @@
  */
 
 // Global Parameters ----------------------------------------------------------------------------------------
-const int s1_pin = 12;
-const int period = 2500; //2500us (2.5ms) in a period
+#define S1_PIN 12
+#define PERIOD 2500 //2500us (2.5ms) in a period
 
 // Global Variables -----------------------------------------------------------------------------------------
-bool positive = false;
-int currentTime = 0, previousTime = 0, duty = 50; //Duty cycle, starts at 50%
+bool _positive = false;
+int _currentTime = 0, _previousTime = 0;
+float _throttle = 0; //Set to 0% throttle by default
 
 void setup() 
 {
   Serial.begin(9600);
   
-  pinMode(s1_pin, OUTPUT);
-  digitalWrite(s1_pin, LOW);
+  pinMode(S1_PIN, OUTPUT);
+  digitalWrite(S1_PIN, LOW);
 }
 
 void loop() 
@@ -27,33 +28,42 @@ void loop()
   //Read from the serial stream to update the duty cycle
   if(Serial.available())
   {
-    int temp_duty = Serial.parseInt();
+    float temp_throttle = Serial.parseFloat();
 
     //Because Serial.parseInt() can timeout if an input is not received fast enough, we want to check and
     //  see if we have a valid entry before updating the duty cycle
-    if(temp_duty > 0)
-      duty = temp_duty;
+    if(temp_throttle > 0)
+      _throttle = temp_throttle;
   }
   
-  currentTime = micros();
+  _currentTime = micros();
 
-  if(positive) //If on the positive side of the cycle...
+  if(_positive) //If on the positive side of the cycle...
   {
-    if(currentTime-previousTime >= period*duty) //... and we've reached the end of the duty cycle for this period:
+    if(_currentTime-_previousTime >= PERIOD*throttle_to_duty(_throttle)) //... and we've reached the end of the duty cycle for this period:
     {
       //Drive the output low but don't reset the timer, the period continues
-      digitalWrite(s1_pin, LOW);
+      digitalWrite(S1_PIN, LOW);
     }
   }
   else //If on the negative side of the cycle...
   {
-    if(currentTime-previousTime >= period) //... and we've reached the end of the period:
+    if(_currentTime-_previousTime >= PERIOD) //... and we've reached the end of the period:
     {
       //The next cycle has begun, drive the output high again
-      digitalWrite(s1_pin, HIGH);
+      digitalWrite(S1_PIN, HIGH);
 
       //Reset the timer
-      previousTime = currentTime;
+      _previousTime = _currentTime;
     }
   }
 }
+
+// Custom Functions -------------------------------------------------------------------------------------
+
+//Calculate the required duty cycle for the throttle input
+float throttle_to_duty(double throttle)
+{
+  return (40 + (.309 * throttle))/100; //Equation taken from characteristic analysis of our ESC's throttle response
+}
+
