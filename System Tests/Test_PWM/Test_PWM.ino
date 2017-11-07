@@ -12,8 +12,8 @@
 
 // Global Variables -----------------------------------------------------------------------------------------
 bool _positive = false;
-int _currentTime = 0, _previousTime = 0;
-float _throttle = 0; //Set to 0% throttle by default
+unsigned int _currentTime = 0, _previousTime = 0;
+unsigned float _throttle = 0; //Set to 0% throttle by default
 
 void setup() 
 {
@@ -21,6 +21,21 @@ void setup()
   
   pinMode(S1_PIN, OUTPUT);
   digitalWrite(S1_PIN, LOW);
+
+  //To initialize communication, the ESC seems to require a 100mS input pulse before becoming active
+  _previousTime = millis();
+  digitalWrite(S1_PIN, HIGH);
+
+  while((millis()-_previousTime) < 100);
+
+  digitalWrite(S1_PIN, LOW);
+
+  //Now wait for 2 seconds
+  _previousTime = millis();
+
+  while((millis()-_previousTime) < 2000);
+
+  Serial.println("ESC Should now be initialized. Ready for throttle input.\n");
 }
 
 void loop() 
@@ -33,7 +48,10 @@ void loop()
     //Because Serial.parseInt() can timeout if an input is not received fast enough, we want to check and
     //  see if we have a valid entry before updating the duty cycle
     if(temp_throttle > 0)
+    {
       _throttle = temp_throttle;
+      Serial.print("Throttle at "); Serial.println(_throttle);
+    }
   }
   
   _currentTime = micros();
@@ -62,7 +80,7 @@ void loop()
 // Custom Functions -------------------------------------------------------------------------------------
 
 //Calculate the required duty cycle for the throttle input
-float throttle_to_duty(double throttle)
+unsigned float throttle_to_duty(unsigned float throttle)
 {
   return (40 + (.309 * throttle))/100; //Equation taken from characteristic analysis of our ESC's throttle response
 }
